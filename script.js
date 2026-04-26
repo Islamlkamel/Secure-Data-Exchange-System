@@ -33,6 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- State Elements ---
+    const userPrefix = document.body.classList.contains('theme-user-a') ? 'userA' : 'userB';
+
     // Key Generation
     const btnGenerate = document.getElementById('btn-generate');
     const loadingKeys = document.getElementById('loading-keys');
@@ -71,6 +73,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 publicKeyEl.value = crypt.getPublicKey();
                 privateKeyEl.value = crypt.getPrivateKey();
+
+                // Save to localStorage so they persist across navigation
+                localStorage.setItem(`${userPrefix}_publicKey`, publicKeyEl.value);
+                localStorage.setItem(`${userPrefix}_privateKey`, privateKeyEl.value);
 
                 // Re-apply blur for safety on new key generation
                 if (blurOverlay) {
@@ -210,4 +216,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Copy logic
     setupCopyToClipboard();
+
+    // Load keys from localStorage if they exist
+    function loadStoredKeys() {
+        const storedPublic = localStorage.getItem(`${userPrefix}_publicKey`);
+        const storedPrivate = localStorage.getItem(`${userPrefix}_privateKey`);
+        if (storedPublic && storedPrivate && publicKeyEl && privateKeyEl) {
+            publicKeyEl.value = storedPublic;
+            privateKeyEl.value = storedPrivate;
+            if (copyPublicBtn) copyPublicBtn.disabled = false;
+            
+            if (blurOverlay) {
+                blurOverlay.classList.remove('hidden');
+                privateKeyEl.classList.add('blurred');
+            }
+        }
+    }
+    loadStoredKeys();
 });
